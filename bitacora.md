@@ -447,6 +447,7 @@ function totalPorCiudadC(ventas, contador) {
 
 Entonces, por cada venta, el trabajo es 2. Con n ventas, 2 × n = 2n. En totalVendidoC solo cuenta la visita, por eso allí da n.
 
+
 ### El reporte que se volviò lento
 
 Traza con 5 ventas
@@ -459,8 +460,11 @@ EN la primera vuelta i tiene el valor de la primera venta y j el de la segunda, 
 
 Para la segunda vuelta i tiene el valor de la segunda vuelta y j el de la tercera, cuarta y quinta
 
-etc...
+Para la tercera vuleta i tiene el valor de la tercera vuelta y j el de la cuarta, y quinta
+ 
+Y para la ultima vuelta i tiene el valor de la cuarta vuelta y j el de la quinta +
 
+Graficamente
 
 venta 1    2 3 4 5 = 4
 venta 2      3 4 5 = 3
@@ -468,8 +472,102 @@ venta 3        4 5 = 2
 venta 4          5 = 1
                   = 10
 
+Total 10 comparaciones (4 + 3 + 2 + 1)
 
-n ventas -> n * (n - 1) / 2
+Por ejemplo con n = 4, seria el mismo patron 
+
+En la primera vuelta i tiene el valor de la primera venta y j el de la segunda, luego tercera y cuarta mientras i sigue en en la misma posiciòn
+En la segunda vuelta i tiene el valor de la segunda venta y j el de la tercera y luego la cuarta, mientras i sigue en la segunda venta
+En la tercera vuelta i tiene el valor de la tercera venta y j el de la cuarta.
+
+Visualmente 
+
+Venta i   Compara con j en 
+venta 1   2 3 4 = 3
+venta 2     3 4 = 2
+venta 3       4 = 1
+                = 6
+
+Total 6 comparaiones (3 + 2 + 1)
+
+Cuantas comparaciones se hacen con n ventas:
+n ventas -> n * (n - 1) / 2 -> Notacion cuadratica 
 
 
+5 ventas -> 5 * (5 - 1) / 2 
+4 ventas -> 4 * (4 - 1) / 2 
 
+
+Tabla de tiempo con console.time y console.timeEnd
+
+
+|n	       |Tiempo (ms)   |	Veces que creció frente al anterior
+|----------|--------------|-----------|
+|1.000	   | 4ms  | -
+|2.000	   | 11ms | x 2,7
+|4.000	   |  56ms | x 5
+|8.000	   | 267ms | x 4,7
+|16.000	   | 866ms | x 3,2
+
+- **Qué pasa con el tiempo?**
+
+Cuando los datos se han duplicado, el tiemo se ha cuadriplicado.
+Puedo observar que en los tiempos grandes, (4.000) en adelante, los valores estan alrededor de 4, lo que da sustento a la anterior linea
+y n al cuadrado predice exactamente ×4, porque (2n)² = 4n al cuadrado.
+
+para 100.000 vamos a usar como base a 16.000
+
+100.000 / 16.000 = 6,25
+
+n crecio 6,25 veces de 16.000 a 100.000
+
+6,25 x 6,25 = 39,0625
+
+El tiempo es 39,0625
+
+866ms x 39 = 33774ms
+
+en segundos 33,7s
+
+- **estimacion: 34s**
+
+|n	       |Tiempo (ms)   |	Veces que creció frente al anterior
+|----------|--------------|-----------|
+|100.000	 | 33,7s | 6,25
+
+y para 1.000.000 / 16.000 = 62,5
+
+62,5 x 62,5 = 3906,25
+
+866ms x 3906,25 = 3382812,5
+
+Tabla de tiempo otro ejemplo
+
+|n	|Tiempo	|Veces que creció
+|-----|------|-------|
+|1.000	|12 ms |	-
+|2.000	|37 ms	|×3,1
+|4.000	|111 ms	|×3,0
+|8.000	|519 ms	|×4,7
+|16.000	|1.642 ms|	×3,2
+|100.000|	77.252 ms	|n creció ×6,25, tiempo ×47
+
+
+HIce dos recorridos y por eso dos tablas, una claramente me dio un valor mucho mayor, esto se puede deber a claramente mi maquina
+y los procesos que se esten ejecutando en ella al momento de hacer las pruebas
+
+#### Que pasa con include dentro de la funcion clientesRecurrentes ?
+
+includes es un costo oculto, y a primera vista parece que convierte la función en O(n alcubo). Pero como ambos factores no pueden ser grandes a la vez, el peor caso total queda en O(n al cuadrado), con una constante mayor. Por eso al duplicar n el tiempo sigue multiplicándose por aproximadamente 4
+
+Basicamente en el peor caso includes agrega trabajo del mismo orden que los ciclos, no uno superior
+
+
+#### Conclusiòn para la gerente 
+
+El reporte se vuelve lento por que compara cada venta con todas las demas existentes.
+Si las ventas se duplican, las operaciones se multiplican x 4, lo que llevaria a un proceso de segundos a horas,
+que quiere decir esto en la practica ? con `16.00 ventas` el programa tardo unos segundos, mientras que con `100.000` ventas el programa tardo
+un tiempo de **1 min y 17 s**.
+Tambien se tanteo con 1 Millòn de ventas y se evidencio en la **simulacion** un tiempo de ejecucion entre 1 Hora y casi 2 horas
+COmo recomendaciòn el programa deberia estar sujeto a ser re escrito para que se revise cada venta una sola vez, en ve de compararla con todas las demas
