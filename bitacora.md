@@ -313,3 +313,163 @@ El reporte se genera con `node src/reporte.js`. La gerente puede pasar las fecha
 | `node src/reproducir-errores.js` | Los dos errores se reproducen con la versión defectuosa y quedan corregidos en la v0.1. |
 
 El reporte también se probó con un arreglo vacío (todas las secciones muestran "No hay ventas registradas" o valores en cero) y con una fecha inválida (`2026-13-01`), que muestra un mensaje que indica el formato correcto.
+
+
+## Minireto 5 
+
+### Predicciòn 
+
+`Si n se multiplica por 10, cuanto se multiplican las operaciones de cada funciòn ?`
+
+- **Total Vendido (Function)**: O(n), Sus operaciones crecen a medida de que los datos crecen.
+Predicciòn: n = 10, operaciones = 10
+
+- **Total Por Ciudad (Function)**: O(n), Sus operaciones crecen a medida de que los datos crecen.
+Predicciòn: n = 10, operaciones = 10
+
+- **Venta Mayor (Function)**: O(n), Sus operaciones crecen a medida de que los datos crecen.
+Predicciòn: n = 10, operaciones = 10
+
+- **Primera Venta**: O(1), Sus operaciones son constantes sin importar la cantidad de datos
+Predicciòn: n = 10, operaciones = 1
+
+### Resultado
+
+┌─────────┬────────┬──────────────┬────────────┬────────────────┬──────────────┐
+│ (index) │ n      │ totalVendido │ ventaMayor │ totalPorCiudad │ primeraVenta │
+├─────────┼────────┼──────────────┼────────────┼────────────────┼──────────────┤
+│ 0       │ 100    │ 100          │ 200        │ 200            │ 1            │
+│ 1       │ 1000   │ 1000         │ 2000       │ 2000           │ 1            │
+│ 2       │ 10000  │ 10000        │ 20000      │ 20000          │ 1            │
+│ 3       │ 100000 │ 100000       │ 200000     │ 200000         │ 1            │
+└─────────┴────────┴──────────────┴────────────┴────────────────┴──────────────┘
+
+- **O(n)** : totalVendido(), totalPorCiudad(), ventaMayor()
+- **O(1)**: primeraVenta()
+
+Por que son O(n) y no una expresion cuadratica ?
+
+Es por que para ello se necesitaria que cada una de las funciones tuviera un ciclo anidado dentro y ninguna la cumple
+
+Acerte el factor de crecimiento (×10) ?
+
+Si, en tres funciones
+
+Acerte el número exacto ?
+
+En totalVendido() solamente, VentaMayor  y totalPorCiudad se aumento O(2n) 
+- Cada venta suma una operaciòn por la visita y la comparaciòn
+
+totalVendido Justificaciòn 
+
+```
+  function totalVendido(ventas) {
+    let total = 0;
+    for (const venta of ventas) {
+      total += valorVenta(venta);
+    }
+    return total;
+  }
+```
+
+Es una funcion `lineal O(n)` Por que su trabajo aumenta a medida de que lo hacen sus datos lo podemos ver asi:
+
+┌─────────┬────────┬──────────────┬
+│ (index) │ n      │ totalVendido │ 
+├─────────┼────────┼──────────────┼
+│ 0       │ 100    │ 100          │
+│ 1       │ 1000   │ 1000         │
+│ 2       │ 10000  │ 10000        │
+│ 3       │ 100000 │ 100000       │ 
+└─────────┴────────┴──────────────
+Por 10 datos seran 10 trabajos, por 1000, seran 1000 trabajos, etc
+
+ventaMayor() y totalPorCiudad
+
+Cada vez que se visita una venta, la instrumentaciòn suma dos operaciones:
+
+ventaMayorC: una por visitar la venta (for...of) y otra por la comparación mayor === null || valor > valorMayor.
+
+```
+function ventaMayorC(ventas, contador) {
+  let mayor = null;
+  let valorMayor = 0;
+  for (const venta of ventas) {
+    contador.ops ++;
+    if (!esVentaValida(venta)) continue;
+    const valor = valorVenta(venta);
+    if (mayor === null || valor > valorMayor) {
+      mayor = venta;
+      valorMayor = valor;
+    }
+    contador.ops++
+  }
+  return mayor;
+}
+```
+***
+n	      totalVendido (n)	ventaMayor (2n)
+100	    100	              200
+1.000	  1.000 (×10)	      2.000 (×10)
+10.000	10.000 (×10)	    20.000 (×10)
+***
+
+totalPorCiudadC: una por visitar la venta (reduce) y otra por la comparación if (!acumulado[clave]).
+
+```
+function totalPorCiudadC(ventas, contador) {
+  const grupos = ventas.reduce((acumulado, venta) => {
+    contador.ops++;
+    if (!venta) return acumulado;
+    const clave = claveTexto(venta.ciudad);
+    const nombre = clave === '' ? 'Sin ciudad' : formatearNombreLugar(venta.ciudad);
+    contador.ops++
+    if (!acumulado[clave]) {
+      acumulado[clave] = { nombre, total: 0 };
+    } else if (!tieneTildes(acumulado[clave].nombre) && tieneTildes(nombre)) {
+      acumulado[clave].nombre = nombre;
+    }
+    acumulado[clave].total += valorVenta(venta);
+    return acumulado;
+  }, {});
+
+  return Object.fromEntries(Object.entries(grupos).map(([, grupo]) => [grupo.nombre, grupo.total]));
+}
+```
+
+#### Ideas Principales
+
+
+- **el 2 en 2n es una constante, no cambia la clasificaciòn.**
+- **un solo ciclo recorre las ventas una vez; las comparaciones dentro del ciclo cuestan un tiempo constante por venta.**
+
+## El 2 no es una constante, el 2 viene del contador en `medir.js`. La constante sigue siendo O(n) puesto que sigue el crecimiento lineal de x 10
+
+Entonces, por cada venta, el trabajo es 2. Con n ventas, 2 × n = 2n. En totalVendidoC solo cuenta la visita, por eso allí da n.
+
+### El reporte que se volviò lento
+
+Traza con 5 ventas
+
+La funcion tiene dos for anidados los cual nos da facilmente el costo de operaciòn igual a : O(n2) 
+
+Hace 10 comparaciones
+
+EN la primera vuelta i tiene el valor de la primera venta y j el de la segunda, tercera, cuarta y quinta
+
+Para la segunda vuelta i tiene el valor de la segunda vuelta y j el de la tercera, cuarta y quinta
+
+etc...
+
+
+venta 1    2 3 4 5 = 4
+venta 2      3 4 5 = 3
+venta 3        4 5 = 2
+venta 4          5 = 1
+                  = 10
+
+
+n ventas -> n * (n - 1) / 2
+
+
+
