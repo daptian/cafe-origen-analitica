@@ -269,5 +269,6 @@ module.exports = {
   ventasDelDia,
   clientesRecurrentes,
   totalCiudadCadena,
-  totalCiudadUnaPasada
+  totalCiudadUnaPasada,
+  agruparPorProducto
 };
