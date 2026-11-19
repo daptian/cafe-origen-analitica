@@ -1,6 +1,7 @@
 const { totalVendidoC, ventaMayorC ,totalPorCiudadC, primeraVentaC} = require( './instrumentadas')
 const { generarVentas } = require('./generador')
 const {ventas} = require('./datos')
+const { totalCiudadCadena, totalCiudadUnaPasada } = require('./analitica')
 
 const nValues = [100, 1000, 10000, 100000]
 
@@ -33,3 +34,8 @@ for (let i = 0; i < nValues.length; i++) {
 
 console.table(data)
 
+// console.log("\nMinireto 7:")
+// console.log("Funciòn de reporte por ciudad")
+
+console.log(totalCiudadCadena(ventas, "Pereira"))
+console.log(totalCiudadUnaPasada(ventas, "Pereira"))

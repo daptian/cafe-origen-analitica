@@ -6,7 +6,11 @@ const {
   ventaMayor,
   ticketPromedio,
   ventasPorCiudad,
+  totalCiudadUnaPasada,
+  totalCiudadCadena,
 } = require('./analitica');
+
+const { generarVentas } = require('./generador')
 
 const casos = [
   { nombre: 'Completo (12)', datos: ventas },
@@ -68,3 +72,13 @@ console.log(
   `\n${comprobaciones.length - fallas}/${comprobaciones.length} comprobaciones correctas.`
 );
 if (fallas > 0) process.exitCode = 1;
+
+// Prueba con el generador  de ventas funciones ; totalCiudadCadena y totalCiudadUnaPasada
+
+const nuevasVentas = generarVentas(10000)
+
+console.log(totalCiudadCadena(nuevasVentas, "Pereira"))
+console.log(totalCiudadUnaPasada(nuevasVentas, "Pereira"))
+
+
+

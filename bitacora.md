@@ -443,10 +443,11 @@ function totalPorCiudadC(ventas, contador) {
 - **el 2 en 2n es una constante, no cambia la clasificaciòn.**
 - **un solo ciclo recorre las ventas una vez; las comparaciones dentro del ciclo cuestan un tiempo constante por venta.**
 
-## El 2 no es una constante, el 2 viene del contador en `medir.js`. La constante sigue siendo O(n) puesto que sigue el crecimiento lineal de x 10
+-**El 2 no es una constante, el 2 viene del contador en `medir.js`. La constante sigue siendo O(n) puesto que sigue el crecimiento lineal de x 10**
 
 Entonces, por cada venta, el trabajo es 2. Con n ventas, 2 × n = 2n. En totalVendidoC solo cuenta la visita, por eso allí da n.
 
+## Minireto 6
 
 ### El reporte que se volviò lento
 
@@ -571,3 +572,97 @@ que quiere decir esto en la practica ? con `16.00 ventas` el programa tardo unos
 un tiempo de **1 min y 17 s**.
 Tambien se tanteo con 1 Millòn de ventas y se evidencio en la **simulacion** un tiempo de ejecucion entre 1 Hora y casi 2 horas
 COmo recomendaciòn el programa deberia estar sujeto a ser re escrito para que se revise cada venta una sola vez, en ve de compararla con todas las demas
+
+## Minireto 7
+### Tiempo memoria y cadenas de metodos
+
+### totalCiudad (video)
+
+**Funciòn 1**
+
+```
+ventas
+    .map(v => ({...v, ciudad:  v.ciudad}))
+    .filter(v => v.ciudad === objetivo)
+    .map(v => valorVenta(v))
+    .reduce((s, x) => s + x, 0)
+``` 
+
+Con esta funciòn se crean 3 arreglos nuevos con 4 recorridos
+lo que me da O(4n)
+
+
+ **Funciòn 2**
+```
+let total = 0;
+for (const v of ventas) {
+    if (normalizar(v.ciudad) === objetivo) {
+        total += valorVenta(v)
+    }
+}
+``` 
+
+Con esta version no se crea ningùn arreglo nuevo y en un solo recorrido hago todo, lo que me da O(1)
+
+### Cuantos recorridos hace cada funciòn ?
+
+|Funcion| # recorridos completos | # arreglos nuevos | En Tiempo | En espacio |
+|------|----|-----|------|-----|
+| totalCiudadCadena | 4 | 3| O(4n) | O(n) |
+|totalCiudadUnaPasada| 1 | 0 | O(n) | O(1) |
+
+Cuando eliminalos las constantes en 'cadena' quedamos con O(n), regla de simplificaciòn 
+significa que es lineal
+
+### Clasificaciòn por funciòn 
+
+|Funciòn | Complejidad Espacial |
+|------|------|
+|limpiarTexto| O(1) |
+|claveTexto| O(1) |
+|tieneTildes| O(1) |
+|formaterNombreLugar| O(1) |
+|cantidadDe| O(1)|
+|PrecioDe|O(1)|
+|valorVenta|O(1)|
+|esVentaValida|O(1)|
+|contarVentasValidas|O(1)|
+|totalVendido|O(1)|
+|unidadesVendidas|O(1)|
+|ventaMayor|O(1)|
+|ticketPromedio|O(1)|
+|ventasPorCiudad|O(1)|
+|totalVendidoM|O(1)|
+|unidadesVendidasM|O(1)|
+|ventasPorCiudadM|O(n)|
+|totalPorCiudad|O(n)|
+|agruparPorProducto|O(n)|
+|unidadesPorProducto|O(n)|
+|topProductosPorValor|O(n)|
+|ventasOrdenadasPorValor|O(n)|
+|esFechaValida|O(1)|
+|ventasDelDia|O(n)|
+|clientesRecurrentes|O(n)|
+|totalCiudadCadena|O(n)|
+|totalCiudadUnaPasada|O(1)|
+
+### Que versiòn de totalCiudad usaras
+
+He decido dejar la version de O(1) recorriendo una unica vez las ventas
+
+
+``` 
+function totalCiudadUnaPasada(ventas, ciudad){
+  let total = 0
+  const ciudadFormateada = formatearNombreLugar(ciudad)
+  for (const v of ventas) {
+    if (formatearNombreLugar(v.ciudad) === ciudadFormateada) {
+      total += valorVenta(v)
+    }
+  }
+  return total;
+}
+``` 
+
+La desiciòn va por parte de los recursos, para mi personalmente, prioriza mas el como este impactarà en mi entorno.
+

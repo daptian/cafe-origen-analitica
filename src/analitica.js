@@ -192,6 +192,8 @@ function esFechaValida(fecha) {
   return !Number.isNaN(fechaReal.getTime()) && fechaReal.toISOString().slice(0, 10) === texto;
 }
 
+
+
 function ventasDelDia(ventas, fecha) {
   const buscada = limpiarTexto(fecha);
   const delDia = ventas.filter((venta) => Boolean(venta) && limpiarTexto(venta.fecha) === buscada);
@@ -222,6 +224,25 @@ function clientesRecurrentes(ventas) {
 return recurrentes;
 }
 
+function totalCiudadCadena(ventas, ciudad) {
+  const formatedCity = formatearNombreLugar(ciudad)
+  return ventas.map(v => ({...v, ciudad:  formatearNombreLugar(v.ciudad)}))
+    .filter(v => v.ciudad === formatedCity)
+    .map(v => valorVenta(v))
+    .reduce((s, x) => s + x, 0)
+}
+
+function totalCiudadUnaPasada(ventas, ciudad){
+  let total = 0
+  const ciudadFormateada = formatearNombreLugar(ciudad)
+  for (const v of ventas) {
+    if (formatearNombreLugar(v.ciudad) === ciudadFormateada) {
+      total += valorVenta(v)
+    }
+  }
+  return total;
+}
+
 module.exports = {
   limpiarTexto,
   claveTexto,
@@ -246,5 +267,7 @@ module.exports = {
   ventasOrdenadasPorValor,
   esFechaValida,
   ventasDelDia,
-  clientesRecurrentes
+  clientesRecurrentes,
+  totalCiudadCadena,
+  totalCiudadUnaPasada
 };
