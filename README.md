@@ -45,10 +45,14 @@ Otros scripts:
 ```
 cafe-origen-analitica/
 ├── src/
-│   ├── datos.js                Muestra de 12 ventas, tal como se exportó
 │   ├── analitica.js            Funciones puras de cálculo
+│   ├── datos.js                Muestra de 12 ventas, tal como se exportó
 │   ├── explorar.js             Exploración de los datos
+│   ├── generador.js            Generador de venta
+│   ├── instrumentadas.js       Version de cada las tres funciones instrumentadas
+│   ├── medir.js                Console.log() para cada funcion de analitica.js
 │   ├── pruebas.js              Pruebas de las funciones con ciclos
+│   ├── recurrentes.js          Tiempo de ejecución con difrentes valores de n
 │   ├── verificar.js            Comparación ciclo vs. método
 │   ├── reporte.js              Reporte de negocio por consola
 │   └── reproducir-errores.js   Reproducción y corrección de errores
