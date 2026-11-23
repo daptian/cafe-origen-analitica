@@ -666,3 +666,36 @@ function totalCiudadUnaPasada(ventas, ciudad){
 
 La desiciòn va por parte de los recursos, para mi personalmente, prioriza mas el como este impactarà en mi entorno.
 
+## Minireto 8 
+### Metodo de 6 pasos 
+
+Cada soluciòn debe collevar 3 preguntas 
+
+Porque es correcta ? 
+Cuanto cuesta ?
+Existe una soluciòn mejor ?
+
+1. Entender 
+2. Ejemplos Pequeños
+3. Fuerza bruta 
+4. Optimizar 
+5. Implementar
+6. Probar
+
+Entender cada entrada con mis palabras, asi mismo con sus salidas y sus restricciones
+Ejemplos pequeños con casos borde, hechos a mano
+Fuerza bruta, aunque sea lento
+Eliminar el trabajo rrepetido para lograr optimizar 
+Implementar, escribir el codigo
+Probar y analizar la complejidad final 
+
+### Mis Mediciones
+
+| n | Original | Set | Map |
+|-----|-----|---|---|
+|1.000| 6.1ms | 0.42ms | 0.58ms |
+|10.000| 1.044s | 4.35ms | 4.027|
+|100.000| ~ 1 min | 49.828ms | 56.74ms|
+
+
+El precio es memoria y el Set guarda guarda hasta 1 elemento por cliente -> O(n) en espacio 
