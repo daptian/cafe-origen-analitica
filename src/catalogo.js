@@ -1,5 +1,5 @@
 const {ventas} = require('./datos') 
-const {formatearNombreLugar, limpiarTexto} = require('./analitica.js')
+const {formatearNombreLugar} = require('./analitica.js')
 
 const catalogo = [
   { producto: "Origen Nariño 250 g", precio: 26000 },
@@ -43,6 +43,10 @@ console.log(comboRegaloMap(catalogo, 87000))
 console.log("Prueba con 61.000")
 console.log(comboRegaloFuerzaBruta(catalogo, 61000))
 console.log(comboRegaloMap(catalogo, 61000))
+
+console.log("Prueba con 92.000")
+console.log(comboRegaloFuerzaBruta(catalogo, 92000))
+console.log(comboRegaloMap(catalogo, 92000))
 
 console.log("<--------------------->")
 console.log("\nproductoEstrellaPorCiudad(ventas)")
