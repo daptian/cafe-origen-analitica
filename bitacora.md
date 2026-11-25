@@ -689,7 +689,7 @@ Eliminar el trabajo rrepetido para lograr optimizar
 Implementar, escribir el codigo
 Probar y analizar la complejidad final 
 
-### Mis Mediciones
+## Minireto 9
 
 | n | Original | Set | Map |
 |-----|-----|---|---|
@@ -699,3 +699,134 @@ Probar y analizar la complejidad final
 
 
 El precio es memoria y el Set guarda guarda hasta 1 elemento por cliente -> O(n) en espacio 
+
+
+## Minireto 10
+### Complejidad 
+
+Punto 3 La funcion comboRegaloFuerzaBruta es O(n2), por que su recorrido es exponencial 
+
+### ComboRegaloMap Documentacion 
+ComboRegaloMap(catalogo, valor)
+
+Busca dos productos del catálogo cuyos precios sumen exactamente el valor indicado.
+
+### Parámetros
+1. Nombre	Tipo	Descripción
+2. catalogo	Array<{ nombre: string, precio: number }>	Lista de productos disponibles.
+3. valor	number	Suma objetivo que deben alcanzar los dos productos (por ejemplo, 87000).
+
+### Retorna
+1. Array con los dos productos que suman valor: [productoA, productoB].
+2. null si no existe ninguna combinación.
+
+Ejemplo :
+js
+```  
+const catalogo = [
+  { nombre: "Libro", precio: 52000 },
+  { nombre: "Camiseta", precio: 30000 },
+  { nombre: "Taza", precio: 35000 },
+];
+
+comboRegaloMap(catalogo, 87000);
+// [{ nombre: "Libro", precio: 52000 }, { nombre: "Taza", precio: 35000 }]
+
+comboRegaloMap(catalogo, 100000);
+// null
+```  
+
+### Notas
+Complejidad: O(n) en tiempo y O(n) en memoria (usa un Map)
+Devuelve solo la primera pareja encontrada
+Si hay precios repetidos, se conserva el último producto con ese precio
+Con precios decimales pueden aparecer errores de punto flotante
+
+### Complejidad de las tres funciones 
+
+1. Complejidad de comboRegaloFuerzaBruta 
+Para esta funcion se usa O(n2) la funcion crece de manera exponencial ya que usa dos ciclos 
+
+``` 
+function comboRegaloFuerzaBruta(catalogo, valor){
+    const productos = [];
+    for (let i = 0; i < catalogo.length; i++) {
+        for (let j = i + 1; j < catalogo.length; j++) {
+            const sumaTotal = catalogo[i].precio + catalogo[j].precio
+            if (catalogo[i] === catalogo[j]) {
+                continue
+            }else if(sumaTotal == valor){
+                productos.push(catalogo[i], catalogo[j])
+            }
+        }
+    }
+    return productos
+}
+``` 
+
+2. Complejidad de comboRegaloMap
+Esta funcion es O(n) a medida que crecen los datos, crece las operaciones linealmente  
+
+```
+function comboRegaloMap(catalogo, valor){
+    const vistos = new Map();
+    for (const p of catalogo) {
+        const falta = valor - p.precio
+        if (vistos.has(falta)) return [vistos.get(falta), p];
+        vistos.set(p.precio, p)
+    }
+    return null
+}
+``` 
+
+3. productoEstrellaPorCiudad
+Esta funciòn es O(n), cada for de la funcion recorre las ventas n veces 
+```
+function productoEstrellaPorCiudad(ventas) {
+    const conteo = new Map();
+    for (const venta of ventas) {
+        const ciudad = formatearNombreLugar(venta.ciudad);
+
+        if (!conteo.has(ciudad)) conteo.set(ciudad, new Map());
+
+        const productos = conteo.get(ciudad);
+        productos.set(venta.producto, (productos.get(venta.producto) || 0) + 1);
+    }
+    const resultado = {};
+
+    for (const [ciudad, productos] of conteo) {
+        let estrella = null;
+        let max = 0;
+
+        for (const [producto, cantidad] of productos) {
+            if (cantidad > max) {
+                max = cantidad;
+                estrella = producto;
+            }
+        }
+
+        resultado[ciudad] = estrella;
+    }
+
+    return resultado;
+}
+```
+
+4. primerClienteUnico
+Esta funciòn es O(n) nuevamente puesto que cada for recorre al menos n veces el arreglo de ventas y a medida de que crecen sus datos crecen sus operaciones de forma lineal 
+
+```
+function primerClienteUnico(ventas){
+    const conteo = new Map();
+    for (const v of ventas) {
+        conteo.set(v.cliente, (conteo.get(v.cliente) || 0) + 1)    
+    }
+    for (const v of ventas) {
+        if (conteo.get(v.cliente) == 1) {
+            return v.cliente
+        }
+    }
+    return null
+}
+
+``` 
