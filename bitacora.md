@@ -982,3 +982,65 @@ console.log(parMasCercano(listaPreciosOrdenados, 40000))
 ```
 
 - **Complejidad:** : Su complejidad recae en Big O(n) en tiempo por que cada vuelta mueve un solo puntero y ninguno se retrocede, seria n pasos linealmente. Una vez claro que el arreglo ya esta ordenando si no seria O(n log n) por el sort; **El sort es O(n log n)**
+
+## MInireto 12
+
+## Cierre · Resumen de la semana y lanzamiento v1.0
+
+Esta sección cierra la bitácora. Resume qué construí en cada MiniReto, qué estrategia usé para optimizar y cómo quedó el producto en la versión v1.0.
+
+### Qué construí en cada MiniReto
+
+| MiniReto | Qué construí | Resultado |
+|---|---|---|
+| 1 · Primer tueste | Repositorio, exploración de los datos y diccionario de datos. | Entendí qué es cada registro (una línea de venta) y detecté casos borde: ciudad escrita de dos formas, venta con cantidad 0 y días sin ventas. |
+| 2 · Los números del día | Funciones con ciclos: `totalVendido`, `unidadesVendidas`, `ventasPorCiudad`, `ventaMayor`, `ticketPromedio`. | Pseudocódigo, trazas manuales y pruebas con tres entradas (completo, un elemento y vacío). |
+| 3 · Del ciclo al método | Versiones con `reduce`, `filter`, `map` y `sort`, y rankings por ciudad y producto. | 27/27 pares ciclo vs. método en OK; el `sort` se hace sobre una copia para no modificar el original. |
+| 4 · Analítica v0.1 | El primer reporte de negocio por consola. | Corregí dos errores: Bogotá duplicada (clave sin normalizar) y ticket promedio `NaN` (división entre cero). |
+| 5 · Contar operaciones | Funciones instrumentadas con contador de operaciones. | Comprobé que las operaciones crecen en línea con n (O(n)) y que `primeraVenta` es constante (O(1)). |
+| 6 · El reporte lento | Análisis de `clientesRecurrentes`. | Es O(n²): con 100.000 ventas tardó 1 min 17 s. Recomendé revisar cada venta una sola vez. |
+| 7 · Tiempo, memoria y cadenas | `totalCiudadCadena` vs. `totalCiudadUnaPasada`. | Elegí la versión de un solo recorrido: mismo tiempo asintótico, pero sin arreglos intermedios. |
+| 8 · Método de 6 pasos | Una forma de resolver problemas: entender, ejemplos pequeños, fuerza bruta, optimizar, implementar, probar. | La usé en todos los retos siguientes. |
+| 9 · Clientes recurrentes | Versiones con `Set` y con `Map` de `clientesRecurrentes`. | Con 100.000 ventas: ~1 min (original), ≈50 ms (`Set`) y ≈57 ms (`Map`). El costo es memoria extra O(n). |
+| 10 · Catálogo | `comboRegaloFuerzaBruta` y `comboRegaloMap`, `productoEstrellaPorCiudad` y `primerClienteUnico`. | Pasé de O(n²) a O(n) en el combo y resolví las otras dos con conteo de frecuencias. |
+| 11 · Ventanas y punteros | `mejorSemanaBruta`, `mejorSemana` (ventana deslizante) y `parMasCercano` (dos punteros). | Con 100.000 días y k = 1000: fuerza bruta ≈67 ms y ventana ≈0,9 ms, con el mismo resultado. |
+| 12 · Lanzamiento v1.0 | `reporte.js` v1.0, con `process.argv`, medición de tiempos y comparación con v0.1. | Cinco secciones nuevas y un reporte que escala a 100.000 ventas. |
+
+### Estrategia aplicada en cada optimización
+
+Casi todas las mejoras siguieron la misma pregunta del método de 6 pasos: **¿qué trabajo estoy repitiendo?** La respuesta cambió según el problema:
+
+| Función | Trabajo repetido en la fuerza bruta | Estrategia | Antes → después |
+|---|---|---|---|
+| `clientesRecurrentes` | Comparar cada venta con todas las siguientes, y volver a recorrer `recurrentes` con `includes`. | **Recordar lo ya visto** con un `Set` (o un `Map` de conteos). | O(n²) → O(n) |
+| `comboRegaloMap` | Probar todas las parejas de productos. | **Buscar el complemento** (`valor - precio`) en un `Map` mientras recorro. | O(n²) → O(n) |
+| `productoEstrellaPorCiudad` | Recontar productos para cada ciudad. | **Conteo de frecuencias** con un `Map` por ciudad, en un solo recorrido. | O(n × ciudades) → O(n) |
+| `primerClienteUnico` | Contar cuántas veces aparece cada cliente, venta por venta. | **Dos recorridos y un `Map`**: primero cuento, luego busco el primero con conteo 1 en el orden original. | O(n²) → O(n) |
+| `mejorSemana` | Volver a sumar los k días de cada bloque. | **Ventana deslizante**: sumo el día que entra y resto el que sale. | O(n·k) → O(n) |
+| `parMasCercano` | Probar todas las parejas de precios. | **Dos punteros** sobre precios ordenados: un puntero nunca retrocede. | O(n²) → O(n) (con el arreglo ya ordenado) |
+| `totalCiudadUnaPasada` | Cuatro recorridos y tres arreglos intermedios. | **Una sola pasada** con un acumulador. | O(n), memoria O(n) → O(1) |
+
+Tres ideas resumen lo aprendido:
+
+1. **Guardar información para no volver a buscarla.** Un `Map` o un `Set` cambia una búsqueda de O(n) por una de O(1), y por eso un ciclo anidado se vuelve un solo ciclo. El precio es memoria extra.
+2. **Aprovechar la estructura de los datos.** La ventana deslizante funciona porque los bloques consecutivos se solapan, y los dos punteros funcionan porque el arreglo está ordenado. Si el arreglo no estuviera ordenado, ordenarlo costaría O(n log n).
+3. **Medir antes de afirmar.** Las predicciones de Big O se confirmaron con `console.time` y con contadores de operaciones. Los tiempos reales variaron entre ejecuciones y a veces fueron mayores que la estimación, como pasó en el MiniReto 6 (estimé ≈34 s y fueron 1 min 17 s).
+
+### Resultado de la v1.0
+
+La v1.0 reemplaza la versión lenta de clientes recurrentes por la de `Set`, y agrega cinco secciones nuevas: clientes recurrentes, producto estrella por ciudad, combo de regalo sugerido, cliente para cupón y mejor semana. Se ejecuta con los datos reales (`node src/reporte.js`) o con n ventas generadas (`node src/reporte.js 100000`), y compara tiempos con `--comparar`.
+
+| Ventas | v0.1 | v1.0 |
+|---|---|---|
+| 10.000 | 426.475ms | 43.663ms | 
+| 100.000 | 54.6s | 398.304ms |
+
+
+### Qué dejaría para una próxima versión
+
+- **Ordenar solo cuando haga falta.** `parMasCercano` exige el arreglo ordenado; hoy el catálogo se ordena una vez al cargar el reporte.
+- **Mejor semana con datos reales.** Con las 12 ventas del Día 1 solo hay 6 fechas, así que la sección avisa que no hay suficientes días. Con más historial se vería su valor.
+
+### Conclusión
+
+Esta semana pasé de escribir funciones que dan el resultado correcto a preguntarme cuánto cuestan cuando los datos crecen. El mejor ejemplo es `clientesRecurrentes`: era correcta con 12 ventas y casi inutilizable con 100.000. La solución no fue un truco, sino identificar el trabajo repetido y guardar lo ya visto. 

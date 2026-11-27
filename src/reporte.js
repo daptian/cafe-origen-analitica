@@ -11,10 +11,26 @@ const {
   unidadesPorProducto,
   topProductosPorValor,
   ventasDelDia,
+  esFechaValida,
+  clientesRecurrentes, 
 } = require('./analitica');
+const { generarVentas } = require('./generador');
+const {
+  catalogo,
+  comboRegaloMap,
+  productoEstrellaPorCiudad,
+  primerClienteUnico,
+} = require('./catalogo');
+const { clientesRecurrentesSet } = require('./recurrentes'); 
+const { mejorSemana, parMasCercano } = require('./mejor-cercano');
 
 const ANCHO = 64;
 const FECHAS_POR_DEFECTO = ['2026-09-04', '2026-09-07'];
+const PRESUPUESTO_COMBO = 87000;
+const DIAS_SEMANA = 7;
+const MAX_RECURRENTES_MOSTRADOS = 5;
+
+const preciosOrdenados = catalogo.map((p) => p.precio).sort((a, b) => a - b);
 
 function pesos(valor) {
   return Number(valor).toLocaleString('es-CO', {
@@ -174,17 +190,157 @@ function seccionDias(datos, fechas) {
   return lineas;
 }
 
-function generarReporte(datos, fechas = FECHAS_POR_DEFECTO) {
-  const lineas = [
+function seccionRecurrentes(datos, buscarRecurrentes) {
+  const recurrentes = [...buscarRecurrentes(datos)].sort();
+  const lineas = titulo('6. CLIENTES RECURRENTES');
+
+  if (recurrentes.length === 0) return [...lineas, '  No hay clientes recurrentes.'];
+  const muestra = recurrentes.slice(0, MAX_RECURRENTES_MOSTRADOS).join(', ');
+  const resto = recurrentes.length - MAX_RECURRENTES_MOSTRADOS;
+  return [
+    ...lineas,
+    dato('Clientes con más de una compra', numero(recurrentes.length)),
+    dato('Primeros', resto > 0 ? `${muestra} y ${numero(resto)} más` : muestra),
+  ];
+}
+
+function seccionEstrellaPorCiudad(datos) {
+  const filas = Object.entries(productoEstrellaPorCiudad(datos)).map(([ciudad, producto]) => ({
+    ciudad,
+    producto,
+  }));
+
+  if (filas.length === 0)
+    return [...titulo('7. PRODUCTO ESTRELLA POR CIUDAD'), '  No hay ventas registradas.'];
+  return [
+    ...titulo('7. PRODUCTO ESTRELLA POR CIUDAD'),
+    ...tabla(
+      [
+        { titulo: 'Ciudad', clave: 'ciudad' },
+        { titulo: 'Producto más vendido', clave: 'producto' },
+      ],
+      filas
+    ),
+  ];
+}
+
+function seccionCombo(presupuesto = PRESUPUESTO_COMBO) {
+  const lineas = [...titulo('8. COMBO DE REGALO SUGERIDO'), dato('Presupuesto', pesos(presupuesto))];
+
+  const exacto = comboRegaloMap(catalogo, presupuesto);
+  if (exacto) {
+    const [a, b] = exacto;
+    return [
+      ...lineas,
+      dato('Combo exacto', `${a.producto} + ${b.producto}`),
+      dato('Suma', pesos(a.precio + b.precio)),
+    ];
+  }
+
+  const par = parMasCercano(preciosOrdenados, presupuesto);
+  if (!par) return [...lineas, '  Ningún par de productos cabe en el presupuesto.'];
+
+  const [precioA, precioB] = par;
+  const a = catalogo.find((p) => p.precio === precioA);
+  const b = catalogo.find((p) => p.precio === precioB && p !== a);
+  return [
+    ...lineas,
+    '  No hay combo exacto; este es el más cercano sin pasarse:',
+    dato('Combo', `${a.producto} + ${b.producto}`),
+    dato('Suma', pesos(precioA + precioB)),
+  ];
+}
+
+function seccionCupon(datos) {
+  const cliente = primerClienteUnico(datos);
+  return [
+    ...titulo('9. CLIENTE PARA CUPÓN'),
+    cliente === null
+      ? '  Todos los clientes compraron más de una vez.'
+      : dato('Primer cliente único', cliente),
+  ];
+}
+
+// Total vendido por día, de la primera a la última fecha, rellenando con 0 los días sin ventas.
+function totalesPorDia(datos) {
+  const porFecha = new Map();
+  for (const venta of datos) {
+    if (!venta || !esFechaValida(venta.fecha)) continue;
+    porFecha.set(venta.fecha, (porFecha.get(venta.fecha) || 0) + valorVenta(venta));
+  }
+  if (porFecha.size === 0) return { fechas: [], totales: [] };
+
+  const ordenadas = [...porFecha.keys()].sort();
+  const DIA_MS = 24 * 60 * 60 * 1000;
+  const fin = new Date(`${ordenadas[ordenadas.length - 1]}T00:00:00Z`).getTime();
+  const fechas = [];
+  const totales = [];
+  for (let t = new Date(`${ordenadas[0]}T00:00:00Z`).getTime(); t <= fin; t += DIA_MS) {
+    const fecha = new Date(t).toISOString().slice(0, 10);
+    fechas.push(fecha);
+    totales.push(porFecha.get(fecha) || 0);
+  }
+  return { fechas, totales };
+}
+
+function seccionMejorSemana(datos) {
+  const lineas = titulo(`10. MEJOR SEMANA (${DIAS_SEMANA} DÍAS SEGUIDOS)`);
+  const { fechas, totales } = totalesPorDia(datos);
+
+  if (fechas.length < DIAS_SEMANA)
+    return [
+      ...lineas,
+      `  No hay suficientes días: se necesitan ${DIAS_SEMANA} y hay ${fechas.length}.`,
+    ];
+
+  const mejor = mejorSemana(totales, DIAS_SEMANA);
+  return [
+    ...lineas,
+    dato('Desde', fechas[mejor.dia]),
+    dato('Hasta', fechas[mejor.dia + DIAS_SEMANA - 1]),
+    dato('Total vendido en la semana', pesos(mejor.total)),
+  ];
+}
+
+function encabezado(version) {
+  return [
     '═'.repeat(ANCHO),
-    '  CAFÉ ORIGEN · Reporte de ventas · v0.1',
+    `  CAFÉ ORIGEN · Reporte de ventas · ${version}`,
     `  Generado: ${new Date().toLocaleDateString('es-CO')}`,
     '═'.repeat(ANCHO),
+  ];
+}
+
+// v0.1: secciones originales (1 a 5) y clientes recurrentes con la versión O(n²).
+function generarReporte(datos, fechas = FECHAS_POR_DEFECTO) {
+  const lineas = [
+    ...encabezado('v0.1'),
     ...seccionResumen(datos),
     ...seccionCiudades(datos),
     ...seccionProductos(datos),
     ...seccionTop(datos),
     ...seccionDias(datos, fechas),
+    ...seccionRecurrentes(datos, clientesRecurrentes),
+    '',
+    '═'.repeat(ANCHO),
+  ];
+  return lineas.join('\n');
+}
+
+// v1.0: lo mismo con la versión O(n) de recurrentes y las secciones nuevas (7 a 10).
+function generarReporteV1(datos, fechas = FECHAS_POR_DEFECTO) {
+  const lineas = [
+    ...encabezado('v1.0'),
+    ...seccionResumen(datos),
+    ...seccionCiudades(datos),
+    ...seccionProductos(datos),
+    ...seccionTop(datos),
+    ...seccionDias(datos, fechas),
+    ...seccionRecurrentes(datos, clientesRecurrentesSet),
+    ...seccionEstrellaPorCiudad(datos),
+    ...seccionCombo(),
+    ...seccionCupon(datos),
+    ...seccionMejorSemana(datos),
     '',
     '═'.repeat(ANCHO),
   ];
@@ -201,14 +357,24 @@ function revisarReporte(texto, datos) {
   return problemas;
 }
 
-if (require.main === module) {
-  const argumentos = process.argv.slice(2);
-  const fechas = argumentos.length > 0 ? argumentos : FECHAS_POR_DEFECTO;
+function leerParametros(argv) {
+  const comparar = argv.includes('--comparar');
+  const argumentos = argv.filter((arg) => arg !== '--comparar');
 
-  const reporte = generarReporte(ventas, fechas);
-  console.log(reporte);
+  // Si el primer argumento es un número positivo, es la cantidad de ventas a generar.
+  const n = Number(argumentos[0]);
+  const generadas = Number.isInteger(n) && n > 0;
+  const fechas = generadas ? argumentos.slice(1) : argumentos;
 
-  const problemas = revisarReporte(reporte, ventas);
+  return {
+    comparar,
+    n: generadas ? n : null,
+    fechas: fechas.length > 0 ? fechas : FECHAS_POR_DEFECTO,
+  };
+}
+
+function mostrarVerificacion(reporte, datos) {
+  const problemas = revisarReporte(reporte, datos);
   if (problemas.length === 0) {
     console.log('  Verificación: sin NaN, sin undefined y sin ciudades duplicadas.\n');
   } else {
@@ -218,4 +384,25 @@ if (require.main === module) {
   }
 }
 
-module.exports = { generarReporte, revisarReporte };
+if (require.main === module) {
+  const { comparar, n, fechas } = leerParametros(process.argv.slice(2));
+  const datos = n === null ? ventas : generarVentas(n);
+  console.log(`Datos: ${n === null ? 'reales del Día 1' : 'generadas'} (${numero(datos.length)} ventas)`);
+
+  let reporteV01;
+  if (comparar) {
+    console.time('Reporte v0.1');
+    reporteV01 = generarReporte(datos, fechas);
+    console.timeEnd('Reporte v0.1');
+  }
+
+  console.time('Reporte v1.0');
+  const reporte = generarReporteV1(datos, fechas);
+  console.timeEnd('Reporte v1.0');
+
+  console.log(reporte);
+  mostrarVerificacion(reporte, datos);
+  if (comparar) mostrarVerificacion(reporteV01, datos);
+}
+
+module.exports = { generarReporte, generarReporteV1, revisarReporte };

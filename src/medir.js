@@ -109,7 +109,7 @@ ventasOrdenadasPorValor(ventasDePrueba)
 console.timeEnd('ventasOrdenadasPorValor')
 
 console.time('ventasDelDia')
-ventasDelDia(ventasDePrueba, '2026-09')
+ventasDelDia(ventasDePrueba, '2026-09-04')
 console.timeEnd('ventasDelDia')
 
 console.time('clientesRecurrentes')

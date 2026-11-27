@@ -86,3 +86,36 @@ Orden de mayor a menor riesgo cuando los datos crecen.
 **¿Qué información se podría guardar para no buscarla de nuevo?**
 - Un registro de **cuántas veces ha aparecido cada cliente**, por ejemplo un objeto o un `Map` con el cliente como clave y el conteo como valor. Consultar o actualizar una clave es de costo constante, sin recorrer nada.
 - Con un solo recorrido de las ventas se actualiza el conteo. Si el conteo de un cliente llega a 2, se agrega a recurrentes (una sola vez, porque justo en ese momento pasa de 1 a 2).
+
+## Verificacion con la V1.0
+
+## Comparación del reporte v0.1 vs v1.0
+
+Medido con `node src/reporte.js <n> --comparar` (solo cuenta la generación del reporte, no la de los datos).
+
+| Ventas | v0.1 | v1.0 |
+|---|---|---|
+| 10.000 | 426.475ms | 43.663ms | 
+| 100.000 | 54.6s | 398.304 |
+
+**Por qué cambia tanto:** la v0.1 usa `clientesRecurrentes` (O(n²)), que compara cada venta con todas las siguientes. La v1.0 usa la versión con `Set` (O(n)), que cuenta en una sola pasada.
+Al pasar de 10.000 a 100.000 ventas (n × 10), la v0.1 crece cerca de 100 veces (n²) y la v1.0 cerca de 10 veces (n).
+
+**Nota:** la v1.0 hace más trabajo que la v0.1 (4 secciones nuevas) y aun así es más rápida.
+
+## Funciones nuevas (v1.0)
+
+| Función | Qué hace | Tiempo | Espacio | Justificación |
+|---|---|---|---|---|
+| `clientesRecurrentesSet` | Clientes con más de una compra | O(n + r log r) | O(n) | Una pasada con dos `Set` (n); luego `sort` de los r recurrentes. En el peor caso r ≈ n |
+| `comprasPorCliente` | Lo mismo con un `Map` de conteos | O(n + r log r) | O(n) | Un recorrido para contar, otro sobre el `Map`, y `sort` de r |
+| `productoEstrellaPorCiudad` | Producto más vendido por ciudad | O(n) | O(n) | Un recorrido cuenta con `Map` anidado; los ciclos de después suman como máximo n entradas. c = ciudades, p = productos |
+| `primerClienteUnico` | Primer cliente con una sola compra | O(n) | O(n) | Dos recorridos seguidos (se suman) y un `Map` con un cliente por entrada |
+| `comboRegaloFuerzaBruta` | Pares con suma exacta | O(n²) | O(1) | Dos `for` anidados prueban cada pareja |
+| `comboRegaloMap` | Primer par con suma exacta | O(n) | O(n) | Una pasada; `has`/`set` del `Map` son O(1) |
+| `mejorSemanaBruta` | Mejor bloque de k días (bruta) | O(n·k) | O(1) | Por cada inicio vuelve a sumar k días |
+| `mejorSemana` | Mejor bloque de k días (ventana) | O(n) | O(1) | Suma el día que entra y resta el que sale; cada día se toca una vez |
+| `parMasCercano` | Par más cercano sin pasarse | O(n) | O(1) | Dos punteros que nunca retroceden. Con el `sort` previo: O(n log n) |
+| `totalesPorDia` (`reporte.js`) | Total por día, con ceros en días sin ventas | O(n) | O(n) | Un recorrido de ventas y uno de los d días |
+| `generarReporte` (v0.1) | Reporte original | **O(n²)** | O(n) | Domina `clientesRecurrentes` |
+| `generarReporteV1` (v1.0) | Reporte completo | **O(n log n)** | O(n) | Domina el `sort` de recurrentes y de productos; el resto es lineal |

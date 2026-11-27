@@ -23,8 +23,6 @@ function mejorSemanaBruta(dias, k) {
     }
 }
 
-console.log(mejorSemanaBruta(ventasDiarias, 7))
-
 function mejorSemana(dias, k){
     let inicioConteo = 0;
     let suma = 0;
@@ -45,8 +43,6 @@ function mejorSemana(dias, k){
         dia: inicioConteo
     }
 }
-
-console.log(mejorSemana(ventasDiarias, 7))
 
 const listaPrecios = []
 
@@ -81,23 +77,30 @@ function parMasCercano(precios, presupuesto) {
     return mejorSuma ? [primerPrecio, segundoPrecio] : null
 }
 
-console.log("Prueba par mas cercano")
-console.log("Con 100.000")
-console.log(parMasCercano(listaPreciosOrdenados, 100000))
-console.log("Con 140.000")
-console.log(parMasCercano(listaPreciosOrdenados, 140000))
-console.log("Con 40.000")
-console.log(parMasCercano(listaPreciosOrdenados, 40000))
+if (require.main === module) {
+    console.log("Prueba par mas cercano")
+    console.log("Con 100.000")
+    console.log(parMasCercano(listaPreciosOrdenados, 100000))
+    console.log("Con 140.000")
+    console.log(parMasCercano(listaPreciosOrdenados, 140000))
+    console.log("Con 40.000")
+    console.log(parMasCercano(listaPreciosOrdenados, 40000))
 
-console.log("Prueba con 100.000 dias")
+    console.log("Prueba con 100.000 dias")
 
-const cienMilPrueba = Array.from({ length: 100000 }, () => Math.floor(Math.random() * 1000))
+    const cienMilPrueba = Array.from({ length: 100000 }, () => Math.floor(Math.random() * 1000))
 
-console.time('bruta')
-console.log(mejorSemanaBruta(cienMilPrueba, 1000))
-console.timeEnd('bruta')
+    console.time('bruta')
+    console.log(mejorSemanaBruta(cienMilPrueba, 1000))
+    console.timeEnd('bruta')
 
-console.time('ventana')
-console.log(mejorSemana(cienMilPrueba, 1000))
-console.timeEnd('ventana')
+    console.time('ventana')
+    console.log(mejorSemana(cienMilPrueba, 1000))
+    console.timeEnd('ventana')
+}
 
+module.exports = {
+    mejorSemanaBruta,
+    mejorSemana,
+    parMasCercano
+}

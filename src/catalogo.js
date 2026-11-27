@@ -1,4 +1,3 @@
-const {ventas} = require('./datos') 
 const {formatearNombreLugar} = require('./analitica.js')
 
 const catalogo = [
@@ -36,20 +35,24 @@ function comboRegaloMap(catalogo, valor){
     }
     return null
 }
-console.log("Prueba con 87.000")
-console.log(comboRegaloFuerzaBruta(catalogo, 87000))
-console.log(comboRegaloMap(catalogo, 87000))
 
-console.log("Prueba con 61.000")
-console.log(comboRegaloFuerzaBruta(catalogo, 61000))
-console.log(comboRegaloMap(catalogo, 61000))
+if(require.main === module){
+    console.log("Prueba con 87.000")
+    console.log(comboRegaloFuerzaBruta(catalogo, 87000))
+    console.log(comboRegaloMap(catalogo, 87000))
 
-console.log("Prueba con 92.000")
-console.log(comboRegaloFuerzaBruta(catalogo, 92000))
-console.log(comboRegaloMap(catalogo, 92000))
+    console.log("Prueba con 61.000")
+    console.log(comboRegaloFuerzaBruta(catalogo, 61000))
+    console.log(comboRegaloMap(catalogo, 61000))
 
-console.log("<--------------------->")
-console.log("\nproductoEstrellaPorCiudad(ventas)")
+    console.log("Prueba con 92.000")
+    console.log(comboRegaloFuerzaBruta(catalogo, 92000))
+    console.log(comboRegaloMap(catalogo, 92000))
+
+    console.log("<--------------------->")
+    console.log("\nproductoEstrellaPorCiudad(ventas)")
+}
+
 
 function productoEstrellaPorCiudad(ventas) {
     const conteo = new Map();
@@ -80,7 +83,6 @@ function productoEstrellaPorCiudad(ventas) {
     return resultado;
 }
 
-console.log(productoEstrellaPorCiudad(ventas))
 
 function primerClienteUnico(ventas){
     const conteo = new Map();
@@ -95,8 +97,10 @@ function primerClienteUnico(ventas){
     return null
 }
 
-console.log(primerClienteUnico(ventas))
-
 module.exports = {
-    catalogo
+    catalogo,
+    comboRegaloFuerzaBruta,
+    comboRegaloMap,
+    productoEstrellaPorCiudad,
+    primerClienteUnico
 }

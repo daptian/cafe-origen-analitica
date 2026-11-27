@@ -54,10 +54,11 @@ function generarVentas(n) {
         const randomProduct = Math.floor(Math.random() * (productList.length))  
         const randomCity = Math.floor(Math.random() *  (citiesList.length))
         const randomQuantity = Math.floor(Math.random() * (5 - 1 + 1)) + 1
+        const randomDay = Math.floor(Math.random() * 30) + 1
 
         ventas.push({
             id: i + 1, 
-            fecha: '2026-09', 
+            fecha: `2026-09-${String(randomDay).padStart(2, '0')}`, 
             cliente: 'C0' + randomClient,
             producto: productList[randomProduct].producto,
             ciudad: citiesList[randomCity] ,
