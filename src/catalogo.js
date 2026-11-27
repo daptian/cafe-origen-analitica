@@ -96,3 +96,7 @@ function primerClienteUnico(ventas){
 }
 
 console.log(primerClienteUnico(ventas))
+
+module.exports = {
+    catalogo
+}

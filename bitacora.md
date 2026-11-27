@@ -830,3 +830,155 @@ function primerClienteUnico(ventas){
 }
 
 ``` 
+
+## Minireto 11
+### Funciòn de mejorSemanaBruto
+
+```
+function mejorSemanaBruta(dias, k) {
+    let mejor = 0
+    let inicio = 0
+    for (let i = 0; i <= dias.length - k; i++) {
+        let suma = 0;
+        for (let j = i; j < i + k; j++) {
+            suma += dias[j]
+        }
+        if (suma > mejor) {
+            mejor = suma 
+            inicio = i
+        }
+    }
+    return {
+        total: mejor,
+        dia: inicio
+    }
+}
+``` 
+
+- **Complejidad:** Esta funciòn cumple con dos ciclos anidados, el primer da n vueltas y el ciclo interno recorre k vueltas, se puede deducir que su Big O es O(n) elevado a la 2.
+
+### Funcion de mejorSemana (Ventana deslizante)
+
+```
+function mejorSemana(dias, k){
+    let inicioConteo = 0;
+    let suma = 0;
+    for (let i = 0; i < k ; i++) {
+        suma += dias[i]
+    }
+    let mejorSemanaTotal = suma;
+    for (let i = k; i < dias.length; i++) {
+        suma += dias[i]
+        suma -= dias[i - k]
+        if (suma > mejorSemanaTotal) {
+            mejorSemanaTotal = suma 
+            inicioConteo = i - k + 1
+        }
+    }
+    return {
+        total: mejorSemanaTotal,
+        dia: inicioConteo
+    }
+}
+```
+
+- **Complejidad** : Su complejidad en Big O para tiempo es O(n), para empezar, no hay ningùn ciclo dentro de otro; por lo tanto no se multiplican las vueltas que da.
+
+- Cada uno de los ciclos se recorre una vez por lo cual su ejecucciòn es lineal. **Nota:** En memoria es O(1) por que sin importar lo dias no creamos ningùn map ni ningùn array.
+
+### Primeras 3 posiciones de la ventana
+- **con sus posiciones** 
+
+|Ventana|	indices (k = 3)|
+|------|------|
+|1.ª |	0, 1, 2
+|2.ª |	1, 2, 3
+|3.ª | 2, 3, 4
+
+- **Suma 1º Ventana** = 320 + 410 + 280 = 1010
+- **Suma 2º Ventana** = 410 + 280 + 390 = 1080
+- **Suma 3º Ventana** = 280 + 390 + 510 = 1180
+
+### Verificacion de la funciòn 
+
+#### Datos de Septiembre
+
+```
+- console.log(mejorSemanaBruta(ventasDiarias, 7))
+- console.log(mejorSemana(ventasDiarias, 7))
+
+// Resultado con datos de Septiembre:
+{ total: 3670, dia: 23 }
+{ total: 3670, dia: 23 }
+```
+
+### Datos con 100.000 dias generados al azar 
+
+```
+-console.time('bruta')
+-console.log(mejorSemanaBruta(cienMilPrueba, 1000))
+-console.timeEnd('bruta')
+
+-console.time('ventana')
+-console.log(mejorSemana(cienMilPrueba, 1000))
+-console.timeEnd('ventana')
+
+//Resultado
+Prueba con 100.000 ventas
+{ total: 534459, dia: 68378 }
+bruta: 66.966ms
+{ total: 534459, dia: 68378 }
+ventana: 0.891ms
+
+``` 
+
+### Funciòn de ParMasCercano
+
+- **Tarea:** Encontrar la suma mayor de dos precios desde catalogos que no superen el presuspuesto
+
+``` 
+function parMasCercano(precios, presupuesto) {
+    let izq = 0
+    let der = precios.length - 1
+    let mejorSuma = 0;
+    let primerPrecio = 0;
+    let segundoPrecio = 0;
+
+    while (izq < der) {
+        let suma = precios[izq] + precios[der]
+        if(suma > presupuesto){
+            der--;
+        }else{
+            if (suma > mejorSuma) {
+                mejorSuma = suma; 
+                primerPrecio = precios[izq]
+                segundoPrecio = precios[der]
+            }
+            izq++
+        } 
+    }
+    return mejorSuma ? [primerPrecio, segundoPrecio] : null
+}
+``` 
+
+#### Verificaciòn de la funciòn 
+
+```
+console.log("Prueba par mas cercano")
+console.log("Con 100.000")
+console.log(parMasCercano(listaPreciosOrdenados, 100000))
+console.log("Con 140.000")
+console.log(parMasCercano(listaPreciosOrdenados, 140000))
+console.log("Con 40.000")
+console.log(parMasCercano(listaPreciosOrdenados, 40000))
+
+// Resultado 
+  Con 100.000
+  [ 18000, 79000 ]
+  Con 140.000
+  [ 45000, 95000 ]
+  Con 40.000
+  null
+```
+
+- **Complejidad:** : Su complejidad recae en Big O(n) en tiempo por que cada vuelta mueve un solo puntero y ninguno se retrocede, seria n pasos linealmente. Una vez claro que el arreglo ya esta ordenando si no seria O(n log n) por el sort; **El sort es O(n log n)**
