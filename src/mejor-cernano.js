@@ -89,7 +89,7 @@ console.log(parMasCercano(listaPreciosOrdenados, 140000))
 console.log("Con 40.000")
 console.log(parMasCercano(listaPreciosOrdenados, 40000))
 
-console.log("Prueba con 100.000 ventas")
+console.log("Prueba con 100.000 dias")
 
 const cienMilPrueba = Array.from({ length: 100000 }, () => Math.floor(Math.random() * 1000))
 
